@@ -1,0 +1,125 @@
+IF DB_ID(N'LibraryDB') IS NULL
+BEGIN
+    CREATE DATABASE [LibraryDB];
+END
+GO
+
+USE [LibraryDB];
+GO
+
+IF OBJECT_ID(N'dbo.Loans', N'U') IS NOT NULL DROP TABLE dbo.Loans;
+IF OBJECT_ID(N'dbo.Reports', N'U') IS NOT NULL DROP TABLE dbo.Reports;
+IF OBJECT_ID(N'dbo.Staff', N'U') IS NOT NULL DROP TABLE dbo.Staff;
+IF OBJECT_ID(N'dbo.Members', N'U') IS NOT NULL DROP TABLE dbo.Members;
+IF OBJECT_ID(N'dbo.Books', N'U') IS NOT NULL DROP TABLE dbo.Books;
+GO
+
+CREATE TABLE dbo.Books
+(
+    BookID INT IDENTITY(1,1) PRIMARY KEY,
+    ISBN NVARCHAR(20) NOT NULL UNIQUE,
+    Title NVARCHAR(200) NOT NULL,
+    Author NVARCHAR(100) NOT NULL,
+    Publisher NVARCHAR(100) NULL,
+    PublishYear INT NULL,
+    Genre NVARCHAR(50) NULL,
+    Quantity INT NOT NULL,
+    AvailableQuantity INT NOT NULL
+);
+GO
+
+CREATE INDEX IX_Books_Title ON dbo.Books(Title);
+CREATE INDEX IX_Books_Author ON dbo.Books(Author);
+GO
+
+CREATE TABLE dbo.Members
+(
+    MemberID INT IDENTITY(1,1) PRIMARY KEY,
+    MemberCode NVARCHAR(20) NOT NULL UNIQUE,
+    FullName NVARCHAR(100) NOT NULL,
+    DateOfBirth DATE NULL,
+    Gender NVARCHAR(10) NULL,
+    Address NVARCHAR(200) NULL,
+    Phone NVARCHAR(15) NULL,
+    Email NVARCHAR(100) NULL,
+    JoinDate DATE NULL CONSTRAINT DF_Members_JoinDate DEFAULT (CAST(GETDATE() AS DATE)),
+    IsActive BIT NULL CONSTRAINT DF_Members_IsActive DEFAULT (1)
+);
+GO
+
+CREATE INDEX IX_Members_FullName ON dbo.Members(FullName);
+GO
+
+CREATE TABLE dbo.Staff
+(
+    StaffID INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    FullName NVARCHAR(100) NULL,
+    Role NVARCHAR(20) NULL CONSTRAINT DF_Staff_Role DEFAULT (N'Staff'),
+    IsActive BIT NULL CONSTRAINT DF_Staff_IsActive DEFAULT (1)
+);
+GO
+
+CREATE TABLE dbo.Reports
+(
+    ReportID INT IDENTITY(1,1) PRIMARY KEY,
+    ReportType NVARCHAR(50) NOT NULL,
+    ReportTitle NVARCHAR(200) NOT NULL,
+    ReportDate DATE NULL CONSTRAINT DF_Reports_ReportDate DEFAULT (CAST(GETDATE() AS DATE)),
+    CreatedBy NVARCHAR(100) NULL,
+    Content NVARCHAR(MAX) NULL,
+    TotalBooks INT NULL CONSTRAINT DF_Reports_TotalBooks DEFAULT (0),
+    TotalMembers INT NULL CONSTRAINT DF_Reports_TotalMembers DEFAULT (0),
+    TotalLoans INT NULL CONSTRAINT DF_Reports_TotalLoans DEFAULT (0),
+    OverdueLoans INT NULL CONSTRAINT DF_Reports_OverdueLoans DEFAULT (0),
+    TotalFine DECIMAL(12,2) NULL CONSTRAINT DF_Reports_TotalFine DEFAULT (0),
+    Notes NVARCHAR(500) NULL
+);
+GO
+
+CREATE INDEX IX_Reports_ReportDate ON dbo.Reports(ReportDate);
+CREATE INDEX IX_Reports_ReportType ON dbo.Reports(ReportType);
+CREATE UNIQUE INDEX UQ_ReportType_Date ON dbo.Reports(ReportType, ReportDate);
+GO
+
+CREATE TABLE dbo.Loans
+(
+    LoanID INT IDENTITY(1,1) PRIMARY KEY,
+    BookID INT NOT NULL,
+    MemberID INT NOT NULL,
+    BorrowDate DATE NULL CONSTRAINT DF_Loans_BorrowDate DEFAULT (CAST(GETDATE() AS DATE)),
+    DueDate DATE NOT NULL,
+    ReturnDate DATE NULL,
+    Status NVARCHAR(20) NULL CONSTRAINT DF_Loans_Status DEFAULT (N'Borrowing'),
+    FineAmount DECIMAL(10,2) NULL CONSTRAINT DF_Loans_FineAmount DEFAULT (0),
+    CONSTRAINT FK_Loans_Books FOREIGN KEY (BookID) REFERENCES dbo.Books(BookID),
+    CONSTRAINT FK_Loans_Members FOREIGN KEY (MemberID) REFERENCES dbo.Members(MemberID)
+);
+GO
+
+INSERT INTO dbo.Books (ISBN, Title, Author, Publisher, PublishYear, Genre, Quantity, AvailableQuantity)
+VALUES
+(N'9786041234561', N'Lập trình C# cơ bản', N'Nguyễn Văn A', N'NXB Trẻ', 2023, N'Công nghệ', 10, 9),
+(N'9786041234562', N'Entity Framework Core thực chiến', N'Trần Văn B', N'NXB Lao Động', 2024, N'Công nghệ', 8, 8),
+(N'9786041234563', N'WPF cho người mới bắt đầu', N'Lê Thị C', N'NXB Giáo Dục', 2022, N'Công nghệ', 6, 5);
+
+INSERT INTO dbo.Members (MemberCode, FullName, DateOfBirth, Gender, Address, Phone, Email, JoinDate, IsActive)
+VALUES
+(N'MB001', N'Phạm Minh An', '2001-06-15', N'Nam', N'Hà Nội', N'0912345678', N'an@gmail.com', CAST(GETDATE() AS DATE), 1),
+(N'MB002', N'Nguyễn Thu Hà', '2002-02-20', N'Nữ', N'Đà Nẵng', N'0988123123', N'ha@gmail.com', CAST(GETDATE() AS DATE), 1),
+(N'MB003', N'Lý Quốc Đạt', '2000-10-05', N'Nam', N'TP.HCM', N'0909123456', N'dat@gmail.com', CAST(GETDATE() AS DATE), 1);
+
+INSERT INTO dbo.Staff (Username, PasswordHash, FullName, Role, IsActive)
+VALUES
+(N'admin', N'admin123', N'Quản trị viên', N'Admin', 1);
+
+INSERT INTO dbo.Loans (BookID, MemberID, BorrowDate, DueDate, ReturnDate, Status, FineAmount)
+VALUES
+(1, 1, DATEADD(DAY, -5, CAST(GETDATE() AS DATE)), DATEADD(DAY, 9, CAST(GETDATE() AS DATE)), NULL, N'Borrowing', 0),
+(3, 2, DATEADD(DAY, -20, CAST(GETDATE() AS DATE)), DATEADD(DAY, -6, CAST(GETDATE() AS DATE)), DATEADD(DAY, -3, CAST(GETDATE() AS DATE)), N'Returned', 10000);
+
+INSERT INTO dbo.Reports (ReportType, ReportTitle, ReportDate, CreatedBy, Content, TotalBooks, TotalMembers, TotalLoans, OverdueLoans, TotalFine, Notes)
+VALUES
+(N'Tổng hợp', N'Báo cáo khởi tạo dữ liệu', CAST(GETDATE() AS DATE), N'admin', N'Dữ liệu mẫu cho dự án WPF.', 24, 3, 2, 0, 10000, N'Generated by init.sql');
+GO
