@@ -1,26 +1,90 @@
-# Quản lý thư viện (WPF)
+# 📚 Library Management System (WPF .NET 10)
 
-## Chạy nhanh cho người mới pull code
+Hệ thống quản lý thư viện - Sách, bạn đọc, mượn/trả, báo cáo
 
-### 1) Yêu cầu
-- Visual Studio 2026 (hoặc bản hỗ trợ .NET 10 + WPF)
-- SQL Server (Express/Developer) hoặc LocalDB
+---
 
-### 2) Tạo database
-- Mở `SQL Server Management Studio`.
-- Chạy file script: `database/init.sql`.
-- Script sẽ tự tạo DB `LibraryDB`, tạo bảng và dữ liệu mẫu.
+## ⚡ Hướng dẫn chạy nhanh
 
-### 3) Kiểm tra connection string
-File `đồ án 2/App.config` đang để mặc định:
+### 1️⃣ Clone & Mở Project
+```bash
+git clone https://github.com/trannamkhanh/DoAn-PF.git
+cd "đồ án 2"
+```
+Mở file `đồ án 2.sln` trong Visual Studio
 
-`Server=localhost;Database=LibraryDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;`
+### 2️⃣ Tạo Database
+Mở SQL Server Management Studio, chạy:
+```sql
+CREATE DATABASE LibraryDB;
+```
 
-Nếu máy bạn không dùng `localhost` (Ví dụ: `.\SQLEXPRESS`) thì sửa `Server=` cho đúng.
+### 3️⃣ Tạo bảng Staff
+Trong SSMS, chọn database `LibraryDB` → Mở và chạy file:
+```
+Database/CreateStaffTable.sql
+```
 
-### 4) Chạy app
-- Mở solution `đồ án 2.slnx`
-- Set startup project: `đồ án 2`
-- Nhấn `F5` hoặc `Ctrl + F5`
+### 4️⃣ Thêm tài khoản demo
+Chạy file:
+```
+Database/InsertDemoAccounts.sql
+```
 
-App sẽ chạy dạng desktop `.exe` và đọc/ghi trực tiếp vào DB.
+**Tài khoản demo:**
+- `admin` / `admin123` (Admin)
+- `staff` / `staff123` (Staff)
+
+### 5️⃣ Chạy ứng dụng
+Visual Studio → Nhấn **F5** (Debug) hoặc **Ctrl+F5** (Run)
+
+---
+
+## 🔑 Thêm tài khoản mới
+
+### Bước 1: Sinh hash password (PowerShell)
+```powershell
+$sha256 = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
+$hash = [Convert]::ToBase64String($sha256.ComputeHash([System.Text.Encoding]::UTF8.GetBytes("matkhai123")))
+Write-Host $hash
+```
+
+### Bước 2: Insert vào database
+```sql
+INSERT INTO Staff (Username, PasswordHash, FullName, Role, IsActive)
+VALUES ('username', 'HASH_VỪA_SINH', 'Họ Tên', 'Staff', 1);
+```
+
+### Bước 3: Kiểm tra
+```sql
+SELECT * FROM Staff;
+```
+
+---
+
+## 📂 File quan trọng
+
+```
+Database/
+├── CreateStaffTable.sql       ← Tạo bảng Staff
+├── InsertDemoAccounts.sql     ← Thêm 2 tài khoản demo
+└── QueryStaffData.sql         ← 10 query quản lý Staff
+```
+
+---
+
+## 🐛 Lỗi thường gặp
+
+| Lỗi | Giải pháp |
+|-----|----------|
+| **Database not found** | Chạy: `CREATE DATABASE LibraryDB;` |
+| **Table Staff not found** | Chạy: `Database/CreateStaffTable.sql` |
+| **Login failed** | Chạy: `Database/InsertDemoAccounts.sql` |
+| **Cannot connect to SQL Server** | Kiểm tra connection string trong `LibraryDbContext.OnConfiguring()` |
+
+---
+
+## 🔗 Xem thêm
+
+- `LOGIN_GUIDE.md` - Hướng dẫn chức năng Login
+- `Database/STAFF_SETUP_GUIDE.md` - Hướng dẫn chi tiết cấu hình Staff
