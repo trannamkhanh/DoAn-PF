@@ -8,6 +8,7 @@ namespace WpfApp3
     public partial class MainWindow : Window
     {
         private readonly LibraryDbContext _db = new();
+        public Staff CurrentUser { get; set; }
 
         public MainWindow()
         {
