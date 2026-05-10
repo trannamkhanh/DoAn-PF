@@ -97,7 +97,6 @@ Write-Host $hash
 - ✅ Chỉ cho phép user có `IsActive = 1` login
 - ✅ Có index tối ưu hóa query login
 
-## 📖 Cấu trúc bảng Staff
 
 ```sql
 CREATE TABLE Staff (

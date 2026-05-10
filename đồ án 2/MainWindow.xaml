@@ -241,10 +241,30 @@
                 </StackPanel>
 
                 <Border Grid.Row="2" Background="#1E293B" CornerRadius="12" Padding="12">
-                    <StackPanel>
-                        <TextBlock Text="Thư viện trung tâm" Foreground="White" FontWeight="SemiBold" />
-                        <TextBlock Text="Trạng thái: Online" Margin="0,4,0,0" Foreground="#86EFAC" FontSize="12" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="Thư viện trung tâm" Foreground="White" FontWeight="SemiBold" />
+                            <TextBlock Text="Trạng thái: Online" Margin="0,4,0,0" Foreground="#86EFAC" FontSize="12" />
+                        </StackPanel>
+                        
+                        <Separator Grid.Row="1" Margin="0,12" Background="#334155" />
+                        
+                        <StackPanel Grid.Row="2">
+                            <TextBlock Text="👤 Tài khoản" Foreground="#CBD5E1" FontSize="11" Margin="0,0,0,6" />
+                            <TextBlock x:Name="TxtCurrentUser" Text="Admin" Foreground="White" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <Border Background="#EF4444" CornerRadius="8">
+                                <Button x:Name="BtnLogout" Content="🚪 Đăng xuất" Click="BtnLogout_Click" 
+                                        Foreground="White" FontWeight="SemiBold"
+                                        Background="Transparent" Padding="12,8" BorderThickness="0" Cursor="Hand" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
                 </Border>
             </Grid>
         </Border>
@@ -259,7 +279,7 @@
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="#0F172A" Offset="0" />
-                        <GradientStop Color="#1E3A8A" Offset="0.55" />
+                        <GradientStop Color="#1D3A8A" Offset="0.55" />
                         <GradientStop Color="#2563EB" Offset="1" />
                     </LinearGradientBrush>
                 </Border.Background>

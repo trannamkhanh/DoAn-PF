@@ -15,6 +15,13 @@ namespace WpfApp3
             InitializeComponent();
             LoadAllData();
             ResetReportForm();
+            
+            // Hiển thị tên user đang đăng nhập
+            if (CurrentUser != null)
+            {
+                TxtCurrentUser.Text = CurrentUser.FullName ?? CurrentUser.Username;
+            }
+            
             SidebarHome_Click(BtnSidebarHome, null);
         }
 
@@ -176,7 +183,7 @@ namespace WpfApp3
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            var totalBooks = _db.Books.Sum(b => (int?)b.Quantity) ?? 0;
+            var totalBooks = _db.Books.Count();  // Đếm số tựa sách (không lấy Quantity)
             var totalMembers = _db.Members.Count();
             var totalLoans = _db.Loans.Count();
             var overdueLoans = _db.Loans.Count(l => l.ReturnDate == null && l.DueDate < today);
@@ -918,6 +925,21 @@ namespace WpfApp3
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi lưu dữ liệu: {ex.Message}");
+            }
+        }
+
+        private void BtnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận đăng xuất", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            
+            if (result == MessageBoxResult.Yes)
+            {
+                // Mở LoginWindow
+                LoginWindow loginWindow = new LoginWindow();
+                loginWindow.Show();
+                
+                // Đóng MainWindow
+                this.Close();
             }
         }
 
